@@ -1,0 +1,15 @@
+# path to raw reads
+sample_loc: "absolute/path/to/reads"
+
+# forward adapter
+forward_adapter: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+
+# reverse adapter
+reverse_adapter: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+# fastp deduplication (True/False)
+fastp_dedup: True
+
+# plot dimensions (cm)
+plot_height: 20
+plot_width: 20
