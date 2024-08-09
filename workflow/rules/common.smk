@@ -16,7 +16,7 @@ configfile: "config/config.yaml"
 
 # configfile parameters
 sample_ids = config["sample_ids"]
-sample_ids_col_num = config["sample_ids_col_num"]
+sample_ids_col_name = config["sample_ids_col_name"]
 delimiter = config["delimiter"]
 project_dir = config["project_dir"]
 go_reference = config["go_reference"]
