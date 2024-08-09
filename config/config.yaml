@@ -1,6 +1,6 @@
 # Sample IDs that would be used for your sequence IDs
 sample_ids: config/sample_ids.csv
-sample_ids_col_num: "Process ID"
+sample_ids_col_name: "Process ID"
 
 # path to raw reads
 project_dir: "absolute/path/to/reads"
