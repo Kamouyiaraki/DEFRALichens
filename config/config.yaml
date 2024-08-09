@@ -1,5 +1,11 @@
+# Sample IDs that would be used for your sequence IDs
+sample_ids: config/sample_ids.csv
+
 # path to raw reads
-sample_loc: "absolute/path/to/reads"
+project_dir: "absolute/path/to/reads"
+
+#delimeter for all output tables
+delimiter: "\t"
 
 # forward adapter
 forward_adapter: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
