@@ -1,4 +1,4 @@
-rule NAME:
+rule ids2csv:
     input:
       sample_ids,
       sample_ids_col_num,
