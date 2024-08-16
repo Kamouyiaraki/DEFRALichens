@@ -1,0 +1,6 @@
+name: myenv
+dependencies:
+  - python=3.9
+  - pandas
+  - snakemake
+  - pip
