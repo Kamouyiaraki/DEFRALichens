@@ -1,0 +1,1 @@
+fastqc get_forward get_reverse -o FastQC_raw
