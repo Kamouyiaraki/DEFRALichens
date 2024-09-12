@@ -78,14 +78,14 @@ bash download_genomes.sh
 | | |
 |Genome assembly GRCh38.p14|GCF_000001405.40|
 | | |
-|Ascomycota, Coniocybomycetes|`[/ref/]() `|
-|Ascomycota, Dothideomycetes|`[/ref/]() ` |
-|Ascomycota, Eurotiomycetes|`[/ref/]() ` |
-|Ascomycota, Lecanoromycetes|`[/ref/]() ` |
-|Ascomycota, Leotiomycetes|`[/ref/]() ` |
-|Ascomycota, Lichinomycetes|`[/ref/]() ` |
-|Ascomycota, Sordariomycetes|`[/ref/]() ` |
-|Ascomycota, *Incertae sedis*, Thelocarpaceae|`[/ref/]() ` |
+|Ascomycota, Coniocybomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Coniocybomycetes_genome_accessions.txt)|
+|Ascomycota, Dothideomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Dothideomycetes_genome_accessions.txt) |
+|Ascomycota, Eurotiomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Eurotiomycetes_genome_accessions.txt) |
+|Ascomycota, Lecanoromycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Lecanoromycetes_genome_accessions.txt) |
+|Ascomycota, Leotiomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Leotiomycetes_genome_accessions.txt) |
+|Ascomycota, Lichinomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Lichinomycetes_genome_accessions.txt) |
+|Ascomycota, Sordariomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Sordariomycetes_genome_accessions.txt) |
+|Ascomycota, *Incertae sedis*, Thelocarpaceae|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Thelocarpaceae_genome_accessions.txt) |
 | | |
-|Basidiomycota, Basidiomycetes|`[/ref/]() ` |
-|Basidiomycota, Urediniomycetes|`[/ref/]() ` |
+|Basidiomycota, Basidiomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Basidiomycetes_genome_accessions.txt) |
+|Basidiomycota, Urediniomycetes|[/ref/](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Urediniomycetes_genome_accessions.txt) |
