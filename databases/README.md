@@ -12,13 +12,20 @@ In this pipeline there are **4** instances of reference data used:
 	- python3.8 + [pandas](https://pandas.pydata.org/docs/getting_started/install.html)
 	- [Taxonkit](https://bioinf.shenwei.me/taxonkit/download/)
 	- [NCBI datasets](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/download-and-install/)
-
+	- [BWA](https://github.com/lh3/bwa)
 
 ## Decontamination database compilation: 
 
 **1) PhiX:** does not need to be compiled into a DB
 
 **2) HG38 *Homo sapiens*:**
+
+```
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+gunzip GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+bwa index GCF_000001405.40_GRCh38.p14_genomic.fna
+
+```
 
 **3) DIAMOND:**
 
