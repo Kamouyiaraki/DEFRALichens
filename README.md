@@ -20,12 +20,10 @@
 
         "Usage: python ids2csv.py <project_dir> <sample_info_file> <column_name> <file_delimiter>"
 
-1) Checks if the input file is a .xlsx or a .csv file
-2) Converts an .xlsx file into a .csv file by reading the Excel file and writing its contents as a CSV.
-3) Reads a CSV file to extract a specific column (based on the provided column name).
-4) Looks for files matching IDs from that column in a given directory.
-5) Logs errors for missing, unpaired, or excessive files.
-6) Writes the found file paths (forward and reverse reads) to a new CSV file.
+1) Reads a file (file delimited can be specified) to extract a specific column  that contains sample IDs that will correspond to raw sequence data IDs (based on the provided column name).
+2) Looks for files matching IDs from that column in a given directory.
+3) Logs errors for missing, unpaired, or excessive files.
+4) Writes the found file paths (forward and reverse reads) to a new CSV file.
 
 ### 2. fastqc_raw.py:
 
