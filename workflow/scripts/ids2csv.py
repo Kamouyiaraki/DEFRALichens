@@ -1,22 +1,36 @@
 import os
 import csv
 import sys
-import pandas as pd
+import numpy
+import pandas
 import pathlib
 import logging
 
+# Ensure the logs directory exists
+log_dir = os.path.dirname("./logs/ids2csv.log")
+os.makedirs(log_dir, exist_ok=True)  # Creates the directory if it doesn't exist
+
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler(sys.stdout))
-logger.addHandler(logging.FileHandler("../logs/ids2csv.log"))
+logger.addHandler(logging.FileHandler("./logs/ids2csv.log"))
 logger.setLevel(logging.INFO)
 
+
 def get_ids(file_path, column_name, delimiter):
-    df = pd.read_csv(file_path, delimiter=delimiter)
+    # Reading in file
+    df = pandas.read_csv(file_path, delimiter=delimiter)
+
+    # Extract IDS
     ids = df[column_name]
+
     return ids
 
+
 def find_files(project_dir, ids):
+    # Initialize a dictionary to store the results
     results = {}
+
+    # Loop through each id
     for id in ids:
         dir = pathlib.Path(project_dir)
         files = [str(file) for file in dir.glob(f"**/*{id}*.f*q.gz")]
@@ -27,20 +41,23 @@ def find_files(project_dir, ids):
             continue
 
         if len(files) == 1:
-            logger.warning(f"ID {id}: Your read files are unpaired.")
+            logger.warning("ID {id}: Your read files are unpaired.")
             continue
 
         if len(files) > 2:
-            logger.warning(f"ID {id}: You have too many files with the same ID.")
+            logger.warning("ID {id}: You have too many files with the same ID.")
             continue
 
         r1_path = files[0]
         r2_path = files[1]
+        # this gives relative file path for full path:  str(files[0].resolve())
 
         if r1_path and r2_path:
+            # Process ID
             results[id] = (r1_path, r2_path)
 
     return results
+
 
 def write_to_csv(results, output_filename):
     with open(output_filename, "w", newline="") as csvfile:
@@ -50,14 +67,19 @@ def write_to_csv(results, output_filename):
             writer.writerow([subfolder, r1_path, r2_path])
 
 if __name__ == "__main__":
-    project_dir = snakemake.input[0]
-    file_path = snakemake.input[1]
-    column_name = snakemake.input[2]
-    delimiter = snakemake.input[3]
-    output_filename = snakemake.output[0]
+    if len(sys.argv) != 5:
+        print(
+            "Usage: python ids2csv.py <project_dir> <sample_info_file> <column_name> <file_delimiter>"
+        )
+        sys.exit(1)
 
+    project_dir = sys.argv[1]
+    output_filename = os.getcwd() + "/samples_out.csv"
+    file_path = sys.argv[2]
+    column_name = sys.argv[3]
+    delimiter = sys.argv[4]
     ids = get_ids(file_path, column_name, delimiter)
+    # print("IDs", ids)
     files_info = find_files(project_dir, ids)
     write_to_csv(files_info, output_filename)
-
     logger.info(f"CSV file '{output_filename}' created successfully.")
