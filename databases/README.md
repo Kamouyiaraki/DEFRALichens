@@ -77,8 +77,15 @@ bash get_accessions.sh
 bash download_genomes.sh
 ```
 
-#### JGI Genome data
+**JGI Genome data**
 JGI Genomes were downloaded to supplement families that were not found in NCBI. This requires a valid JGI account and log in details, but can be downloaded using the JGI API (find download options [here](https://genome.jgi.doe.gov/portal/help/download.jsf#/api))
+
+
+### JGI Terms and Conditions to be aware of:
+
+> By accessing JGI data, you agree not to publish any articles containing analyses of genes or genomic data prior to publication by the principal investigators of its comprehensive analysis without the consent of the project's principal investigator(s). These restrictions will be lifted upon publication(s) of the dataset or two years after the public release of this data, whichever is first. Scientists are expected to contact the principal investigator about their intentions to include any data from this project in a publication prior to publication of the primary report in order to ensure that their publication does not compete directly with planned publications (e.g. reserved analyses) of the principal investigators.
+
+> If these data are used for publication, the following acknowledgment should be included: ‘These sequence data were produced by the US Department of Energy Joint Genome Institute https://www.jgi.doe.gov/ in collaboration with the user community.’ We also request that you appropriately cite any JGI resources used for analysis (such as IMG, Phytozome or Mycocosm) and that you notify us upon publication.
 
 ## Accession numbers
 
