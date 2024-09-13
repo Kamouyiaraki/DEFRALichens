@@ -101,7 +101,7 @@ JGI Genomes were downloaded to supplement families that were not found in NCBI. 
 |Ascomycota, Lecanoromycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Lecanoromycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_lecanoromycetes_links) |
 |Ascomycota, Leotiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Leotiomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_leotiomycetes_links) |
 |Ascomycota, Lichinomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Lichinomycetes_genome_accessions.txt) | -- |
-|Ascomycota, Sordariomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Sordariomycetes_genome_accessions.txt) | --|
+|Ascomycota, Sordariomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Sordariomycetes_genome_accessions.txt) |[JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_sordariomycetes_links) |
 |Ascomycota, *Incertae sedis*, Thelocarpaceae|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Thelocarpaceae_genome_accessions.txt) | -- |
 | | |
 |Basidiomycota, Basidiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Basidiomycetes_genome_accessions.txt) | -- |
