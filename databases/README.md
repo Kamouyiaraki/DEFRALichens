@@ -76,10 +76,63 @@ bash get_accessions.sh
 ## Download the 
 bash download_genomes.sh
 
-## Concatenate into a single file
-find ./ncbi_dataset/ -type f -exec mv {} ./// \;
-rm -r ./ncbi_dataset/
-cat *fa > all_genomes.fa
+## Concatenate genomes into a single file in each class directory 
+	## For JGI genomes:
+	### For Dothideomycetes
+    find ./Bimnz1/ -type f -exec mv {} ./// \;
+    find ./Veren1/ -type f -exec mv {} ./// \;
+    rm -r ./Bimnz1/
+    rm -r ./Veren1/
+
+	### 	Eurotiomycetes
+    find ./Cocba1/ -type f -exec mv {} ./// \;
+    find ./Parmar1/ -type f -exec mv {} ./// \;
+    rm -r ./Cocba1/
+    rm -r ./Parmar1/
+
+	###	Lecanoromycetes
+    find ./Grascr1/ -type f -exec mv {} ./// \;
+    rm -r ./Grascr1/
+
+	###	Leotiomycetes
+    find ./Atrpi1/ -type f -exec mv {} ./// \;
+    find ./Lopnit1_1/ -type f -exec mv {} ./// \;
+    find ./Bulin1/ -type f -exec mv {} ./// \;
+    find ./Cocst1/ -type f -exec mv {} ./// \;
+    find ./Pseel1/ -type f -exec mv {} ./// \;
+    find ./Spafl1/ -type f -exec mv {} ./// \;
+    find ./Themi1/ -type f -exec mv {} ./// \;
+    find ./Elyde1/ -type f -exec mv {} ./// \;
+    find ./Greab1/ -type f -exec mv {} ./// \;
+    find ./Greabi1/ -type f -exec mv {} ./// \;        
+    find ./Psever1/ -type f -exec mv {} ./// \;
+    find ./PseVKM3775_1/ -type f -exec mv {} ./// \;  
+    find ./PseVKM4514_1/ -type f -exec mv {} ./// \;
+    find ./Thest1/ -type f -exec mv {} ./// \;           
+    rm -r ./Atrpi1/ 
+    rm -r  /Lopnit1_1/ 
+    rm -r ./Bulin1/ 
+    rm -r ./Cocst1/ 
+    rm -r ./Pseel1/ 
+    rm -r ./Spafl1/ 
+    rm -r ./Themi1/ 
+    rm -r ./Elyde1/ 
+    rm -r ./Greab1/ 
+    rm -r ./Greabi1/        
+    rm -r ./Psever1/
+    rm -r ./PseVKM3775_1/   
+    rm -r ./PseVKM4514_1/ 
+    rm -r ./Thest1/
+
+	###	Sordariomycetes
+    find ./Nieex1/ -type f -exec mv {} ./// \;
+    rm -r ./Nieex1/
+
+
+The following was then run once per directory:
+rm -r *.zip
+bash cat_genomes.sh
+
 ```
 
 **JGI Genome data**
