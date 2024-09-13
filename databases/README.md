@@ -127,15 +127,17 @@ bash download_genomes.sh
 	###	Sordariomycetes
     find ./Nieex1/ -type f -exec mv {} ./// \;
     rm -r ./Nieex1/
-
-
-The following was then run once per directory:
-rm -r *.zip
-bash cat_genomes.sh
-
 ```
 
-**JGI Genome data**
+#### The following was then run once per directory:
+
+```
+rm -r *.zip
+bash cat_genomes.sh
+```
+
+
+**JGI Genome data details**
 JGI Genomes were downloaded to supplement families that were not found in NCBI. This requires a valid JGI account and log in details, but can be downloaded using the JGI API (find download options [here](https://genome.jgi.doe.gov/portal/help/download.jsf#/api))
 
 
