@@ -75,6 +75,11 @@ bash get_accessions.sh
 
 ## Download the 
 bash download_genomes.sh
+
+## Concatenate into a single file
+find ./ncbi_dataset/ -type f -exec mv {} ./// \;
+rm -r ./ncbi_dataset/
+cat *fa > all_genomes.fa
 ```
 
 **JGI Genome data**
