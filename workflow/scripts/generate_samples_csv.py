@@ -1,28 +1,46 @@
 import os
-import csv
 import sys
-import numpy
-import pandas
+import pandas as pd
+from pathlib import Path
 import pathlib
 import logging
+import csv
 
 # Ensure the logs directory exists
-log_dir = os.path.dirname("./logs/ids2csv.log")
+log_dir = os.path.dirname("./logs/Generate_Samples_Csv.log")
 os.makedirs(log_dir, exist_ok=True)  # Creates the directory if it doesn't exist
 
+# Configure logger
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.addHandler(logging.FileHandler("./logs/ids2csv.log"))
 logger.setLevel(logging.INFO)
 
+def xlsx2csv(file_path):
+    # Check if the provided file exists
+    if not Path(file_path).is_file():
+        logger.error(f"Error: The file '{file_path}' does not exist.")
+        sys.exit(1)
+
+    # Read the Excel sheet
+    xlsx_read = pd.read_excel(file_path)
+
+    # Extract the name of the Excel file without the extension
+    csv_name = pathlib.Path(file_path).stem
+    dirname = os.path.dirname(file_path)
+
+    # Convert the Excel sheet to a CSV file
+    csv_file_path = f"{dirname}/{csv_name}.csv"
+    xlsx_read.to_csv(csv_file_path, index=None, header=True)
+
+    logger.info(f"Successfully converted '{file_path}' to '{csv_file_path}'")
+    return csv_file_path
+
 
 def get_ids(file_path, column_name, delimiter):
     # Reading in file
-    df = pandas.read_csv(file_path, delimiter=delimiter)
-
-    # Extract IDS
+    df = pd.read_csv(file_path, delimiter=delimiter)
     ids = df[column_name]
-
     return ids
 
 
@@ -50,10 +68,9 @@ def find_files(project_dir, ids):
 
         r1_path = files[0]
         r2_path = files[1]
-        # this gives relative file path for full path:  str(files[0].resolve())
+        # this gives relative file path for full path: str(files[0].resolve())
 
         if r1_path and r2_path:
-            # Process ID
             results[id] = (r1_path, r2_path)
 
     return results
@@ -66,20 +83,31 @@ def write_to_csv(results, output_filename):
         for subfolder, (r1_path, r2_path) in results.items():
             writer.writerow([subfolder, r1_path, r2_path])
 
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print(
-            "Usage: python ids2csv.py <project_dir> <sample_info_file> <column_name> <file_delimiter>"
-        )
-        sys.exit(1)
 
-    project_dir = sys.argv[1]
-    output_filename = os.getcwd() + "/samples_out.csv"
-    file_path = sys.argv[2]
-    column_name = sys.argv[3]
-    delimiter = sys.argv[4]
+def main(project_dir, file_path, column_name, delimiter):
+    # If the file is an XLSX, convert it to CSV
+    if pathlib.Path(file_path).suffix == ".xlsx":
+        file_path = xlsx2csv(file_path)
+    
+    # Extract IDs from the CSV
     ids = get_ids(file_path, column_name, delimiter)
-    # print("IDs", ids)
+    logger.info(f"Extracted IDs: {list(ids)}")
+
+    # Find the corresponding files
     files_info = find_files(project_dir, ids)
+
+    # Write the results to a CSV
+    output_filename = os.getcwd() + "/samples_out.csv"
     write_to_csv(files_info, output_filename)
     logger.info(f"CSV file '{output_filename}' created successfully.")
+
+    
+if __name__ == "__main__":
+    # Define project-specific arguments
+    delimiter = ','  
+    project_dir = 'Test_dir/SRA_dir'
+    file_path = 'Test_dir/SRA_lichen_metagenome_test.xlsx'
+    column_name = 'Run_ID'
+
+    # Call the main function with the arguments
+    main(project_dir, file_path, column_name, delimiter)
