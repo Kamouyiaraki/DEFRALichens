@@ -26,13 +26,12 @@
 
 **input = the raw file names for each ID in the spreadsheet**
 
-1) Runs FastQC on the raw sequence files for manual quality control and checking purposes.
+1) Runs [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) on the raw sequence files for manual quality control and checking purposes.
 2) Outputs FastQC files to a directory per ID found and sequences analysed
 
 ### 3. fastp.py
 
 One-pass FASTQ data preprocessing: quality control, deduplication, merging of paired reads, and trimming using [fastp](https://github.com/OpenGene/fastp)
-> Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107. https://doi.org/10.1002/imt2.107
 
 **Parameters selected:**
 
@@ -46,7 +45,6 @@ One-pass FASTQ data preprocessing: quality control, deduplication, merging of pa
         --unpaired1 
         --unpaired2
 
-
 ### 4. fastqc_processed.py:
 
 **input = directory of fastp outputs**
@@ -56,3 +54,9 @@ One-pass FASTQ data preprocessing: quality control, deduplication, merging of pa
 3) The default for fastp is to merge files, so FastQC should result in a single `.html` and `.zip` output per ID (all outputs will be directed to the same folder as `fastqc_raw.py`
 
 ### 5. 
+
+
+
+## References
+
+> Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107. https://doi.org/10.1002/imt2.107
