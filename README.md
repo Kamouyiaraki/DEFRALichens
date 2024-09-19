@@ -8,22 +8,19 @@
 
 ### Public service announcement:
 
-**The first script (`ids2csv.py`) is set up so can be run using system arguments independently, the rest of the scripts will require input parameters changed within the main argument at the bottom of the script if planning to customise** 
-
 **all error checking and logs are output to `./log/` directory that is generated in the first script**
 
 
-### 1. ids2csv.py:
+### 1. generate_samples_csv.py:
 
 **input = a file that includes at least one column with the ID that matches raw sequence data.**
 
+        "Usage: python generate_samples_csv.py <project_dir> <sample_info_file> <column_name> <file_delimiter>"
 
-        "Usage: python ids2csv.py <project_dir> <sample_info_file> <column_name> <file_delimiter>"
-
-1) Reads a file (file delimited can be specified) to extract a specific column  that contains sample IDs that will correspond to raw sequence data IDs (based on the provided column name).
+1) Reads a file (file delimited can be specified) to extract a specific column that contains sample IDs that will correspond to raw sequence data IDs (based on the provided column name). If this file is `.xlsx` it will convert it first to a `.csv` before running.
 2) Looks for files matching IDs from that column in a given directory.
 3) Logs errors for missing, unpaired, or excessive files.
-4) Writes the found file paths (forward and reverse reads) to a new CSV file.
+4) Writes the found file paths (forward and reverse reads) to a new `.csv` file.
 
 ### 2. fastqc_raw.py:
 
@@ -33,6 +30,21 @@
 2) Outputs FastQC files to a directory per ID found and sequences analysed
 
 ### 3. fastp.py
+
+One-pass FASTQ data preprocessing: quality control, deduplication, merging of paired reads, and trimming using [fastp](https://github.com/OpenGene/fastp)
+> Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107. https://doi.org/10.1002/imt2.107
+
+**Parameters selected:**
+
+        --min phred = 4
+        --merge
+        --PE
+        --trim poly g
+        --correction of PE
+        --out1
+        --out2
+        --unpaired1 
+        --unpaired2
 
 
 ### 4. fastqc_processed.py:
