@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 import re
 import pathlib
@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 if not logger.hasHandlers():
     stream_handler = logging.StreamHandler(sys.stdout)
-    file_handler = logging.FileHandler(os.path.join(log_dir, "bbduk.log"))
+    file_handler = logging.FileHandler(os.path.join(log_dir, "decontam_processed.log"))
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     stream_handler.setFormatter(formatter)
@@ -32,7 +32,7 @@ def get_ids(seq_dir):
         return set()
 
     logger.info(f"Scanning directory: {dir_path}")
-    ids = {match.group(1) for file in dir_path.glob("*.f*q")
+    ids = {match.group(1) for file in dir_path.glob("*processed.f*q")
            if (match := re.match(r'(.+?)_processed', file.stem))}
 
     logger.info(f"Found IDs: {', '.join(ids)}")
@@ -45,7 +45,7 @@ def find_files(seq_dir, ids):
         return {}
 
     results = {id: str(files[0]) for id in ids
-               if (files := sorted(dir_path.glob(f"*{id}*.f*q")))}
+               if (files := sorted(dir_path.glob(f"*{id}*processed.f*q")))}
 
     missing_ids = ids - results.keys()
     if missing_ids:
@@ -63,9 +63,8 @@ def run_subprocess(command, id, log_prefix):
         logger.error(f"Error running {log_prefix} for {id}. See log for details.")
         raise subprocess.CalledProcessError(result.returncode, command)
 
-def run_bbduk(id, file_path, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
-    output_file = f"{output_dir}/{id}_nophiX.fq"
+def run_bbduk(id, file_path, output_dir, temp_dir):
+    output_file = os.path.join(temp_dir, f"{id}_nophiX.fq")
     command = [
         "../../../users/marik2/apps/bbmap/bbduk.sh",
         f"in={file_path}",
@@ -76,28 +75,27 @@ def run_bbduk(id, file_path, output_dir):
         "-Xmx2g",
         f"stats={output_dir}/{id}_nophiX_stats.txt"
     ]
-
     run_subprocess(command, id, "bbduk")
     logger.info(f"Processed {id} for PhiX contamination")
     return output_file  # Return the processed file path
 
-def run_bwa_mem_and_samtools(id, input_file, output_dir):
+def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
     genome_fasta = "./ref/GCF_000001405.40_GRCh38.p14_genomic.fna"
-    sam_file = f"{output_dir}/{id}_output.sam"
-    bam_file = f"{output_dir}/{id}_output.bam"
-    sorted_bam_file = f"{output_dir}/{id}_output_sorted.bam"
-    unmapped_fastq = f"{output_dir}/{id}_unmapped_reads.fastq"
-    stats_file = f"{output_dir}/{id}_stats.txt"
+    bam_file = f"{temp_dir}/{id}_output.bam"
+    sorted_bam_file = f"{temp_dir}/{id}_output_sorted.bam"
+    unmapped_fastq = f"{output_dir}/{id}_decontaminated_reads.fastq"
+    stats_file = f"{output_dir}/{id}_human_mapping_idxstats.txt"
 
     try:
-        # Run BWA MEM to align the reads
-        with open(sam_file, "w") as sam_out:
-            logger.info(f"Running BWA MEM for {id}")
-            subprocess.run(["bwa", "mem", "-M", "-t", "8", genome_fasta, input_file], stdout=sam_out, check=True)
-
-        # Convert SAM to BAM
-        logger.info(f"Converting SAM to BAM for {id}")
-        subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "view", "-b", "-S", sam_file, "-o", bam_file], check=True)
+        # Run BWA MEM to align the reads and pipe directly to samtools view
+        logger.info(f"Running BWA MEM and SAMtools for {id}")
+        bwa_cmd = ["bwa", "mem", "-M", "-t", "8", genome_fasta, input_file]
+        samtools_view_cmd = ["../../../users/marik2/apps/samtools-1.20/samtools", "view", "-b", "-o", bam_file]
+        with open(bam_file, "w") as bam_out:
+            p1 = subprocess.Popen(bwa_cmd, stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(samtools_view_cmd, stdin=p1.stdout, stdout=bam_out)
+            p1.stdout.close()
+            p2.communicate()
 
         # Sort BAM file
         logger.info(f"Sorting BAM file for {id}")
@@ -113,7 +111,7 @@ def run_bwa_mem_and_samtools(id, input_file, output_dir):
 
         # Generate statistics
         logger.info(f"Generating statistics for {id}")
-        subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "stats", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
+        subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "idxstat", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
 
         logger.info(f"Successfully processed {id} for genome alignment and stats generation")
 
@@ -122,7 +120,13 @@ def run_bwa_mem_and_samtools(id, input_file, output_dir):
     except Exception as e:
         logger.error(f"Unexpected error during processing of {id}: {e}")
 
-def main(seq_dir, output_dir, max_workers=6):
+def main(seq_dir, output_dir, max_workers=None):
+    # Dynamically set number of workers to CPU count if not provided
+    max_workers = max_workers or os.cpu_count()
+
+    temp_dir = os.path.join(output_dir, "temp_dir")
+    os.makedirs(temp_dir, exist_ok=True)
+
     ids = get_ids(seq_dir)
     if not ids:
         logger.error("No IDs found. Exiting.")
@@ -134,22 +138,18 @@ def main(seq_dir, output_dir, max_workers=6):
         return
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for id, file_path in files.items():
-            future_bbduk = executor.submit(run_bbduk, id, file_path, output_dir)
-            futures.append(future_bbduk)
-            future_bbduk.add_done_callback(
-                lambda fut, id=id, output_dir=output_dir: executor.submit(run_bwa_mem_and_samtools, id, fut.result(), output_dir)
-            )
+        futures = [executor.submit(run_bbduk, id, file_path, output_dir, temp_dir) for id, file_path in files.items()]
 
-        for future in futures:
+        for future in as_completed(futures):
             try:
-                future.result()
+                result = future.result()
+                id = result.split("/")[-1].split("_")[0]  # Extract ID from result
+                executor.submit(run_bwa_mem_and_samtools, id, result, output_dir, temp_dir)
             except Exception as e:
                 logger.error(f"Error processing a file: {e}")
 
 if __name__ == "__main__":
     seq_dir = './fastp_processed/'
-    output_dir = './bbduk_processed'
+    output_dir = './decontaminated_reads'
 
-    main(seq_dir, output_dir, max_workers=6)
+    main(seq_dir, output_dir)
