@@ -111,6 +111,34 @@ Assemblers:
         Additional change: Insert lengths reduced following [guidance](https://www.seqanswers.com/forum/bioinformatics/bioinformatics-aa/24625-250bp-reads-in-idba_ud)
 
 
+### Assembly Checkpoint - run_assembly_check.py
+> input(1)  = assembler type 
+
+> input (2) = `assemblies` directory with subdirectory for each assembly type in the format of `<ID>_<ASSEMBLER>`
+
+`run_assembly_check.py` is used to call a "check assembly" script specific to each assembler (Valid assemblers are: 'megahit', 'metaspades', 'idba-ud', 'mhm2'):
+
+- check_assemblies_megahit.py
+
+If a `final.contigs.fa` file is not found, it will attempt to "resume" MEGAHIT (`--continue`)
+  
+- check_assemblies_metaspades.py
+
+If a `scaffolds.fasta` file is not found, it will attempt to "resume" MetaSPADES (`--continue`)
+
+
+- check_assemblies_idba-ud.py
+
+If a `contig.fa` **OR** `scaffold.fa` file is not found, it will spit out an error message. IDBA-UD does not offer a resume option, therefore the assembly will have to be restarted or a different assembler will have to be used. 
+
+
+- <mhm2 TBC> 
+
+*mhm2 TBC*
+
+Each check assembly script requires a specified assembly directory (input(2)). 
+
+
 
 ## References
 - Simon Andrews, 2010. FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
