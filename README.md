@@ -4,77 +4,6 @@
 
 *note: this will avoid using any Anaconda/bioconda reliance* 
 
-### Directory strucutre
-
-```
-├── assemblies
-│   ├── <ID>_idba_ud
-│   ├── <ID>_megahit
-│   ├── <ID>_metaspades
-│   ├── <ID>_mhm2
-├── decontaminated_reads
-├── fastp_processed
-├── <ID>
-├── logs
-├── ref
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.amb
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.ann
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.bwt
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.pac
-│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.sa
-│   ├── lichendb
-│   │   ├── Ascomycota
-│   │   │   ├── Coniocybomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── Coniocybomycetes_genome_accessions.txt
-│   │   │   │   └── README.md
-│   │   │   ├── Dothideomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── README.md
-│   │   │   │   └── Reduced_Dothideomycetes_genome_accessions.txt
-│   │   │   ├── Eurotiomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── README.md
-│   │   │   │   └── Reduced_Eurotiomycetes_genome_accessions.txt
-│   │   │   ├── Lecanoromycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── README.md
-│   │   │   │   └── Reduced_Lecanoromycetes_genome_accessions.txt
-│   │   │   ├── Leotiomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── README.md
-│   │   │   │   └── Reduced_Leotiomycetes_genome_accessions.txt
-│   │   │   ├── Lichinomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── Lichinomycetes_genome_accessions.txt
-│   │   │   │   └── README.md
-│   │   │   ├── Sordariomycetes
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   ├── README.md
-│   │   │   │   └── Reduced_Sordariomycetes_genome_accessions.txt
-│   │   │   └── Thelocarpaceae
-│   │   │       ├── concatenated_genomes.fa
-│   │   │       ├── README.md
-│   │   │       └── Thelocarpaceae_genome_accessions.txt
-│   │   ├── Basidiomycota
-│   │   │   ├── Basidiomycetes
-│   │   │   │   ├── Basidiomycetes_genome_accessions.txt
-│   │   │   │   ├── concatenated_genomes.fa
-│   │   │   │   └── README.md
-│   │   │   └── Urediniomycetes
-│   │   │       ├── concatenated_genomes.fa
-│   │   │       ├── README.md
-│   │   │       ├── Urediniomycetes_genome_accessions.txt
-│   ├── NC_001422.1_escherichia_phage_phiX174.fasta
-│   ├── uniref90.fasta.dmnd
-│   ├── uniref90.fasta.gz
-│    uniref90.fasta.taxlist.gz
-└── samples_out.csv
-
-```
-
-
 
 ## Script details and descriptions:
 
@@ -157,7 +86,7 @@ For each file:
 5) Generate statistics on the alignment.
 
 
-### 5. ASSEMBLY
+### 5a. ASSEMBLY
 
 > input = `decontaminated_reads` directory (MetaSPADES ONLY also includes: unmerged reads from `./fastp_processed`)
 >
@@ -183,7 +112,7 @@ Assemblers:
         Additional change: Insert lengths reduced following [guidance](https://www.seqanswers.com/forum/bioinformatics/bioinformatics-aa/24625-250bp-reads-in-idba_ud)
 
 
-### Assembly Checkpoint - run_assembly_check.py
+### 5b. Assembly Checkpoint - run_assembly_check.py
 > input(1)  = assembler type 
 
 > input (2) = `assemblies` directory with subdirectory for each assembly type in the format of `<ID>_<ASSEMBLER>`
@@ -210,6 +139,87 @@ If a `contig.fa` **OR** `scaffold.fa` file is not found, it will spit out an err
 
 Each check assembly script requires a specified assembly directory (input(2)). 
 
+### 6. bwa_unassembled_reads.py
+
+> input =
+>
+> output = 
+
+1) Scans a specified directory for IDs.
+2) For each ID, it identifies the appropriate assembly file based on the selected assembler (e.g., megahit, metaspades, or idba-ud). If idba-ud is used, it checks for alternative assembly files.
+3) Uses BWA to output unassembled Reads and Stats
+4) Concatenates the unassembled Reads with the final contigs file.
+
+
+## Directory strucutre
+
+```
+├── assemblies
+│   ├── <ID>_idba_ud
+│   ├── <ID>_megahit
+│   ├── <ID>_metaspades
+│   ├── <ID>_mhm2
+├── decontaminated_reads
+├── fastp_processed
+├── <ID>
+├── logs
+├── ref
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.amb
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.ann
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.bwt
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.pac
+│   ├── GCF_000001405.40_GRCh38.p14_genomic.fna.sa
+│   ├── lichendb
+│   │   ├── Ascomycota
+│   │   │   ├── Coniocybomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── Coniocybomycetes_genome_accessions.txt
+│   │   │   │   └── README.md
+│   │   │   ├── Dothideomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── README.md
+│   │   │   │   └── Reduced_Dothideomycetes_genome_accessions.txt
+│   │   │   ├── Eurotiomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── README.md
+│   │   │   │   └── Reduced_Eurotiomycetes_genome_accessions.txt
+│   │   │   ├── Lecanoromycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── README.md
+│   │   │   │   └── Reduced_Lecanoromycetes_genome_accessions.txt
+│   │   │   ├── Leotiomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── README.md
+│   │   │   │   └── Reduced_Leotiomycetes_genome_accessions.txt
+│   │   │   ├── Lichinomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── Lichinomycetes_genome_accessions.txt
+│   │   │   │   └── README.md
+│   │   │   ├── Sordariomycetes
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   ├── README.md
+│   │   │   │   └── Reduced_Sordariomycetes_genome_accessions.txt
+│   │   │   └── Thelocarpaceae
+│   │   │       ├── concatenated_genomes.fa
+│   │   │       ├── README.md
+│   │   │       └── Thelocarpaceae_genome_accessions.txt
+│   │   ├── Basidiomycota
+│   │   │   ├── Basidiomycetes
+│   │   │   │   ├── Basidiomycetes_genome_accessions.txt
+│   │   │   │   ├── concatenated_genomes.fa
+│   │   │   │   └── README.md
+│   │   │   └── Urediniomycetes
+│   │   │       ├── concatenated_genomes.fa
+│   │   │       ├── README.md
+│   │   │       ├── Urediniomycetes_genome_accessions.txt
+│   ├── NC_001422.1_escherichia_phage_phiX174.fasta
+│   ├── uniref90.fasta.dmnd
+│   ├── uniref90.fasta.gz
+│    uniref90.fasta.taxlist.gz
+└── samples_out.csv
+
+```
 
 
 ## References
