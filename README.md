@@ -1,4 +1,4 @@
-# DEFRALichens
+# DEFRA Lichens
 
 *template for snakemake + scripts for Lichen pipeline*
 
