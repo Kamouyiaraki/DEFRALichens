@@ -50,7 +50,7 @@ def check_assembly(id, assembly_dir):
         logger.info(f"Final contigs file missing for {id}. Checking for scaffolds.")
         scaffolds_file = Path(f"{assembly_dir}/{id}_idba_ud/scaffold.fa")
         
-        # Check again if contigs file exists after running MEGAHIT
+        # Check again if contigs file exists after running IDBA-UD
         if scaffolds_file.is_file():
             logger.info(f"Scaffolds file successfully found for {id}.")
         else:
