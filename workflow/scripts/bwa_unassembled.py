@@ -10,60 +10,51 @@ import pathlib
 log_dir = "./logs"
 os.makedirs(log_dir, exist_ok=True)
 
-#Create a temporary assembly directory 
-tmp_dir = "./assemblies/temp"
-os.makedirs(tmp_dir, exist_ok=True)
+# Create a temporary assembly directory
+assembly_dir = './assemblies'
+tmp_dir = pathlib.Path(f"{assembly_dir}/temp")
+tmp_dir.mkdir(exist_ok=True)
 
-# Set up logging to both stdout and a file
+# Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 if not logger.hasHandlers():
-    stream_handler = logging.StreamHandler(sys.stdout)
-    file_handler = logging.FileHandler(os.path.join(log_dir, "unassembled_reads.log"))
-
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(formatter)
+
+    file_handler = logging.FileHandler(os.path.join(log_dir, "unassembled_reads.log"))
     file_handler.setFormatter(formatter)
 
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
 
-def get_ids(seq_dir):
-    dir_path = pathlib.Path(seq_dir)
-    if not dir_path.is_dir():
-        logger.error(f"Directory {seq_dir} does not exist.")
-        return set()
-
-    logger.info(f"Scanning directory: {dir_path}")
-    ids = {match.group(1) for file in dir_path.glob("*_unmapped_reads.*") 
-           if (match := re.match(r'(.+?)_unmapped_reads', file.stem))}
-    
-    if not ids:
-        logger.warning("No IDs found.")
-    else:
-        logger.info(f"Found IDs: {', '.join(ids)}")
-    
-    return ids
-
-def find_files(seq_dir, ids):
+def get_ids_and_files(seq_dir):
     dir_path = pathlib.Path(seq_dir)
     if not dir_path.is_dir():
         logger.error(f"Directory {seq_dir} does not exist.")
         return {}
 
-    results = {id: str(files[0]) for id in ids
-               if (files := sorted(dir_path.glob(f"*{id}*_*unmapped_reads.f*q")))}
+    # Log available files in the directory
+    logger.info(f"Scanning directory: {dir_path}")
 
-    missing_ids = ids - results.keys()
-    if missing_ids:
-        logger.warning(f"No reads found for IDs: {', '.join(missing_ids)}")
+    # Look for fastq or fq files and extract IDs from filenames
+    results = {re.match(r'(.+?)_.*', file.stem).group(1): str(file)
+               for file in dir_path.glob("*unmapped_reads.f*q*")}
+
+    if not results:
+        logger.error(f"No reads found in {seq_dir}")
+    else:
+        logger.info(f"Found IDs and files: {results}")
 
     return results
 
 def run_subprocess(command, id, log_prefix):
     result = subprocess.run(command, capture_output=True, text=True)
-    with open(f"{log_dir}/{id}_{log_prefix}_output.log", "w") as f_out, open(f"{log_dir}/{id}_{log_prefix}_error.log", "w") as f_err:
+    with open(f"{log_dir}/{id}_{log_prefix}_output.log", "w") as f_out, \
+         open(f"{log_dir}/{id}_{log_prefix}_error.log", "w") as f_err:
         f_out.write(result.stdout)
         f_err.write(result.stderr)
 
@@ -71,13 +62,77 @@ def run_subprocess(command, id, log_prefix):
         logger.error(f"Error running {log_prefix} for {id}. See log for details.")
         raise subprocess.CalledProcessError(result.returncode, command)
 
-def run_bwa_unassembled(id, input_file):
-    assembly_fasta = pathlib.Path(f"./assemblies/{id}_megahit/final.contigs.fa")
-    sam_file = pathlib.Path(f"./assemblies/temp/{id}_assembly_mapped.sam")
-    bam_file = pathlib.Path(f"./assemblies/temp/{id}_assembly_mapped.bam")
-    sorted_bam_file = pathlib.Path(f"./assemblies/temp/{id}_assembly_mapped_sorted.bam")
-    unassembled_fasta = pathlib.Path(f"./assemblies/{id}_megahit/unassembled.fa")
-    assembly_stats_file = pathlib.Path(f"./assemblies/{id}_megahit/assembly_stats.txt"
+def concatenate_files(id, assembler):
+    contigs_file = find_assembly_file(assembler, id)
+    unassembled_file = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/unassembled.fa")
+    final_assembly_file = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/assembly.fa")
+
+    if contigs_file.exists() and unassembled_file.exists():
+        try:
+            with final_assembly_file.open('w') as output_file:
+                for input_file in [contigs_file, unassembled_file]:
+                    output_file.write(input_file.read_text())
+            logger.info(f"Successfully concatenated files for {id}.")
+        except Exception as e:
+            logger.error(f"Error concatenating files for {id}: {e}")
+    else:
+        logger.error(f"Missing contigs or unassembled file for {id}.")
+
+import pathlib
+
+def find_assembly_file(assembler, id):
+    assembly_files = {
+        "megahit": "final.contigs.fa",
+        "metaspades": "scaffolds.fasta",
+        "idba_ud": ["contig.fa", "scaffold.fa"]
+    }
+
+    # Check for idba-ud files
+    if assembler == "idba_ud":
+        file_name1 = assembly_files["idba_ud"][0]
+        file_name2 = assembly_files["idba_ud"][1]
+
+        # Construct paths for both file options
+        file_path1 = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/{file_name1}")
+        file_path2 = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/{file_name2}")
+
+        # Check if the first file exists
+        if file_path1.is_file():
+            return file_path1
+
+        # Check if the second file exists if the first doesn't
+        elif file_path2.is_file():
+            return file_path2
+
+        # Log an error if neither file exists
+        else:
+            logger.error(f"Missing {assembler} {file_path1} or {file_path2} file for {id}.")
+            return None
+
+    # For non-idba-ud assemblers, return the appropriate file
+    else:
+        file_name = assembly_files.get(assembler)
+        if file_name:
+            file_path = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/{file_name}")
+            if file_path.is_file():
+                return file_path
+            else:
+                logger.error(f"Missing {assembler} assembly file for {id}.")
+                return None
+        else:
+            logger.error(f"Unknown assembler: {assembler}")
+            return None
+
+
+def run_bwa_unassembled(id, assembler, input_file):
+    logger.info(f"Processing with assembler: {assembler}")
+
+    assembly_fasta = find_assembly_file(assembler, id)
+    sam_file = pathlib.Path(f"{assembly_dir}/temp/{id}_assembly_mapped.sam")
+    bam_file = pathlib.Path(f"{assembly_dir}/temp/{id}_assembly_mapped.bam")
+    sorted_bam_file = pathlib.Path(f"{assembly_dir}/temp/{id}_assembly_mapped_sorted.bam")
+    unassembled_fasta = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/unassembled.fa")
+    assembly_stats_file = pathlib.Path(f"{assembly_dir}/{id}_{assembler}/assembly_stats.txt")
 
     if assembly_fasta.is_file():
         try:
@@ -118,30 +173,30 @@ def run_bwa_unassembled(id, input_file):
         logger.info(f"No assembly found for {id}, proceeding with unassembled reads")
         subprocess.run(["cp", input_file, f"./assemblies/{id}_megahit/unassembled.fa"], check=True)
 
-def main(seq_dir, max_workers=6):
-    ids = get_ids(seq_dir)
-    if not ids:
-        logger.error("No IDs found. Exiting.")
-        return
-
-    files = find_files(seq_dir, ids)
-    if not files:
-        logger.error("No files found. Exiting.")
+def main(seq_dir, assembler, max_workers=6):
+    """Main function to process all IDs found in the sequence directory."""
+    id_to_file = get_ids_and_files(seq_dir)
+    if not id_to_file:
+        logger.error("No input files found. Exiting.")
         return
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for id, file_path in files.items():
-            future_bwa = executor.submit(run_bwa_unassembled, id, file_path)
-            futures.append(future_bwa)
-
+        futures = [executor.submit(run_bwa_unassembled, id, assembler, input_file) for id, input_file in id_to_file.items()]
         for future in futures:
             try:
                 future.result()
             except Exception as e:
                 logger.error(f"Error processing a file: {e}")
 
-if __name__ == "__main__":
-    seq_dir = './bbduk_processed/'
+    # After processing all files, concatenate the results
+    for id in id_to_file.keys():
+        try:
+            concatenate_files(id, assembler)
+        except Exception as e:
+            logger.error(f"Error concatenating files for {id}: {e}")
 
-    main(seq_dir, max_workers=6)
+if __name__ == "__main__":
+    seq_dir = './decontaminated_reads/'
+    assembler = 'metaspades'
+
+    main(seq_dir, assembler, max_workers=6)
