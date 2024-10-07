@@ -137,6 +137,42 @@ bash cat_genomes.sh
 ```
 
 
+**5) Makeblastdb Lichen DB**
+
+Blast databases were made for each of the references using `makeblastdb` version 2.11.0+. 
+
+*Example:*
+
+```
+mkdir blastdbs
+mkdir ./blastdbs/Ascomycota
+mkdir ./blastdbs/Basidiomycota
+cd ./blastdbs
+makeblastdb -in ../Ascomycota/Eurotiomycetes/concatenated_genomes.fa -dbtype nucl -out ./Ascomycota/Eurotiomycetes_genomes
+```
+
+In some instances, concatenating sequences resulted in duplicated seq IDs. This was resolved using `fasta-unique-names` from [MEME suite](https://web.mit.edu/meme_v4.11.4/share/doc/fasta-unique-names.html#:~:text=Description,any%20names%20which%20are%20duplicates.)
+
+Installation of [MEME suite v 5.5.7](https://meme-suite.org/meme//doc/download.html) was done as follows: 
+
+```
+wget https://meme-suite.org/meme/meme-software/5.5.7/meme-5.5.7.tar.gz
+tar zxf meme-5.5.7.tar.gz
+cd meme-5.5.7
+./configure --prefix=$HOME/meme --with-url=http://meme-suite.org --enable-build-libxml2 --enable-build-libxslt
+make
+make test
+make install
+```
+
+*Example usage:* 
+
+```
+cd ../Ascomycota/Eurotiomycetes/
+../../../../../../../users/marik2/apps/meme-5.5.7/scripts/fasta-unique-names -r ./concatenated_genomes.fa
+```
+
+
 **JGI Genome data details**
 JGI Genomes were downloaded to supplement families that were not found in NCBI. This requires a valid JGI account and log in details, but can be downloaded using the JGI API (find download options [here](https://genome.jgi.doe.gov/portal/help/download.jsf#/api))
 
