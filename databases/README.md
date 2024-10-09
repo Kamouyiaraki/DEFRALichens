@@ -42,8 +42,8 @@ diamond makedb --in uniref90.fasta.gz -d uniref90.fasta.dmnd
 awk -F"\t" '{print $4}' scaffold_reference_genomes.txt | tail -n +2 > scaffold_ref_genomes.txt
 
 ## Run taxonkit to get lineage information + reformatted lineage information to standardize lineage across all
-../../../../../users/marik2/apps/bin/taxonkit lineage scaffold_ref_genomes.txt --data-dir ../../../../../users/marik2/apps/bin/taxonkit_db/ > scaffold_ref_genomes_lineages.txt
-../../../../../users/marik2/apps/bin/taxonkit reformat scaffold_ref_genomes_lineages.txt --data-dir ../../../../../users/marik2/apps/bin/taxonkit_db > scaffold_ref_genomes_lineages_reformat.txt
+./apps/bin/taxonkit lineage scaffold_ref_genomes.txt --data-dir ./apps/bin/taxonkit_db/ > scaffold_ref_genomes_lineages.txt
+./apps/bin/taxonkit reformat scaffold_ref_genomes_lineages.txt --data-dir ./apps/bin/taxonkit_db > scaffold_ref_genomes_lineages_reformat.txt
 
 
 ## Make directories to be used as db's
@@ -141,14 +141,30 @@ bash cat_genomes.sh
 
 Blast databases were made for each of the references using `makeblastdb` version 2.11.0+. 
 
-*Example:*
-
 ```
-mkdir blastdbs
-mkdir ./blastdbs/Ascomycota
-mkdir ./blastdbs/Basidiomycota
-cd ./blastdbs
-makeblastdb -in ../Ascomycota/Eurotiomycetes/concatenated_genomes.fa -dbtype nucl -out ./Ascomycota/Eurotiomycetes_genomes
+_dir="/absolute/path/to/ref/lichendb/Ascomycota/*/"
+
+for f in $_dir
+do
+    if [ -d "$f" ]; then
+        dir_name=$(basename "$f")
+        echo "Running makeblastdb for $dir_name"
+        makeblastdb -in "${f}/concatenated_genomes.fa" -dbtype nucl -title "${dir_name}_genomes"
+    fi
+done
+
+
+_dir2="/absolute/path/to/ref/lichendb/Basidiomycota/*/"
+
+for g in $_dir2
+do
+    if [ -d "$g" ]; then
+        dir_name2=$(basename "$g")
+        echo "Running makeblastdb for $dir_name2"
+        makeblastdb -in "${g}/concatenated_genomes.fa" -dbtype nucl -title "${dir_name2}_genomes"
+    fi
+done
+
 ```
 
 In some instances, concatenating sequences resulted in duplicated seq IDs. This was resolved using `fasta-unique-names` from [MEME suite](https://web.mit.edu/meme_v4.11.4/share/doc/fasta-unique-names.html#:~:text=Description,any%20names%20which%20are%20duplicates.)
@@ -169,7 +185,7 @@ make install
 
 ```
 cd ../Ascomycota/Eurotiomycetes/
-../../../../../../../users/marik2/apps/meme-5.5.7/scripts/fasta-unique-names -r ./concatenated_genomes.fa
+./apps/meme-5.5.7/scripts/fasta-unique-names -r ./concatenated_genomes.fa
 ```
 
 
