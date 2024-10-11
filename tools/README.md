@@ -3,7 +3,7 @@
 ### Code for extracting all URLs from a website
 
 - Open the console by pressing `F12`
-- In console paste the javascript `get_urls.js`
+- In console paste the javascript `get_urls.js` (found at: https://www.datablist.com/learn/scraping/extract-urls-from-webpage)
 - Copy and paste the output into a `.csv` file
   
 ### R scripts used to filter which JGI genomes to download
