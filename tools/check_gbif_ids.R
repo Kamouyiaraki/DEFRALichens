@@ -3,7 +3,7 @@ library(dplyr)
 library(taxize)
 library(tools)
 
-###Function to pull gbif metadata from taxonomic name
+#Function to pull gbif metadata from taxonomic name
 
 get_gbifid_out <- function(csv_file, out_file){
 
@@ -37,15 +37,12 @@ get_gbifid_out <- function(csv_file, out_file){
   write.csv(gbiftaxID, out_file, row.names = F)
 }
 
-
 ### Usage across files
-
-filelist <- list.files(pattern = "_Lichen_Tracking_Sheet_null_taxids.csv")
-
-f<-1
-for(f in 1:length(filelist)){
-  fbase <- tools::file_path_sans_ext(filelist[f])
-  fout <- paste0(fbase, "_gbif.csv")
-  
-  get_gbifid_out(csv_file = filelist[f], out_file=fout)
-}
+#filelist <- list.files(pattern = "_Lichen_Tracking_Sheet_null_taxids.csv")
+#f<-1
+#for(f in 1:length(filelist)){
+#  fbase <- tools::file_path_sans_ext(filelist[f])
+#  fout <- paste0(fbase, "_gbif.csv")
+#  
+#  get_gbifid_out(csv_file = filelist[f], out_file=fout)
+#}
