@@ -15,6 +15,7 @@
 
 ### Python script for pulling NCBI taxIDs 
 - get_taxids_per_batch.py
+- Relies on [taxonkit](https://bioinf.shenwei.me/taxonkit/)
 - Retrieves taxids and appends to master input spreadsheet (output = `.csv`)
 - Also outputs `.csv` of taxonomic names with null taxids
 
@@ -22,6 +23,7 @@
 ### R script for pulling GBIF metadata based on taxonomic name 
 
 - Source function `get_gbifid_out()` in check_gbif_ids.R
+- Relies on [taxize](https://cran.r-project.org/package=taxize)
 - Run on a csv file of taxonomic names (column 1 = Taxonomic_name)
 - Output is in the format of: `*_Lichen_Tracking_Sheet_null_taxids_gbif.csv`
 
