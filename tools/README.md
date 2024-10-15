@@ -37,7 +37,7 @@ f<-1
 #for each file run get_gbifid_out() 
 for(f in 1:length(filelist)){
   fbase <- tools::file_path_sans_ext(filelist[f])
-  fout <- paste0(fbase, "_gbif.csv")
+  fout <- paste0(fbase, "_gbif.xlsx")
   
   get_gbifid_out(csv_file = filelist[f], out_file=fout)
 }
