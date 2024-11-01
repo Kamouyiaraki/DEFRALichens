@@ -35,6 +35,10 @@ def read_file(file_path):
         delimiter = detect_delimiter(file_path)
         df = pd.read_csv(file_path, delimiter=delimiter)
     
+    # Drop rows that are entirely empty
+    df.dropna(how="all", inplace=True)
+
+
     return df
 
 def merge_df(df):
@@ -58,7 +62,7 @@ def merge_df(df):
     return outfile
 
 def get_taxids(df, column_name, file_path):
-    ids = df[column_name]
+    ids = [str(item) for item in df[column_name]]
     with open('ids.txt', 'w') as f:
         f.write("\n".join(ids))
     
@@ -95,7 +99,7 @@ def main(file_path, column_name):
 
 if __name__ == "__main__":
     # Define project-specific arguments
-    file_path = 'Batch_3_Lichen_Tracking_Sheet.xlsx'
+    file_path = 'Batch_4_Lichen_Tracking_Sheet.xlsx'
     column_name = 'Taxonomic_name'
 
     # Call the main function with the arguments
