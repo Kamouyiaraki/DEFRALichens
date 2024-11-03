@@ -18,6 +18,10 @@ In this pipeline there are **4** instances of reference data used:
 
 **1) PhiX:** does not need to be compiled into a DB
 
+```
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/enterobacteria_phage_phix174_sensu_lato_uid14015/NC_001422.fna
+```
+
 **2) HG38 *Homo sapiens*:**
 
 ```
