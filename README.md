@@ -37,7 +37,7 @@ All error checking and logs are output to `./log/` directory that is generated i
 2) Outputs FastQC files to a directory per ID found and sequences analysed
 
 
-### 3. fastp.py
+### 3. fastp_raw.py
 
 > input = `samples_out.csv`
 >
@@ -59,20 +59,7 @@ Parameters:
         --unpaired1 
         --unpaired2
 
-
-
-### 4a. fastqc_processed.py:
-
-> input = `fastp_proccessed` directory
->
-> output = FastQC output files in each ID directory
-
-1) Uses the names of the files to derive IDs
-2) Will then run FastQC on each fastp output for manual quality control and checking purposes.
-3) The default for fastp is to merge files, so FastQC should result in a single `.html` and `.zip` output per ID (all outputs will be directed to the same folder as `fastqc_raw.py`
-
-
-### 4b. decontam.py
+### 4. decontam.py
 
 > input = `fastp_proccessed` directory
 > 
