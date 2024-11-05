@@ -25,34 +25,6 @@ if not logger.hasHandlers():
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
 
-def get_ids(seq_dir):
-    dir_path = pathlib.Path(seq_dir)
-    if not dir_path.is_dir():
-        logger.error(f"Directory {seq_dir} does not exist.")
-        return set()
-
-    logger.info(f"Scanning directory: {dir_path}")
-    ids = {match.group(1) for file in dir_path.glob("*processed.f*q")
-           if (match := re.match(r'(.+?)_processed', file.stem))}
-
-    logger.info(f"Found IDs: {', '.join(ids)}")
-    return ids
-
-def find_files(seq_dir, ids):
-    dir_path = pathlib.Path(seq_dir)
-    if not dir_path.is_dir():
-        logger.error(f"Directory {seq_dir} does not exist.")
-        return {}
-
-    results = {id: str(files[0]) for id in ids
-               if (files := sorted(dir_path.glob(f"*{id}*processed.f*q")))}
-
-    missing_ids = ids - results.keys()
-    if missing_ids:
-        logger.warning(f"No reads found for IDs: {', '.join(missing_ids)}")
-
-    return results
-
 def run_subprocess(command, id, log_prefix):
     result = subprocess.run(command, capture_output=True, text=True)
     with open(f"{log_dir}/{id}_{log_prefix}_output.log", "w") as f_out, open(f"{log_dir}/{id}_{log_prefix}_error.log", "w") as f_err:
@@ -66,7 +38,7 @@ def run_subprocess(command, id, log_prefix):
 def run_bbduk(id, file_path, output_dir, temp_dir):
     output_file = os.path.join(temp_dir, f"{id}_nophiX.fq")
     command = [
-        "../../../users/marik2/apps/bbmap/bbduk.sh",
+        "../../../bin/bbmap/bbduk.sh",
         f"in={file_path}",
         f"out={output_file}",
         "ref=./ref/NC_001422.1_escherichia_phage_phiX174.fasta",
@@ -79,8 +51,39 @@ def run_bbduk(id, file_path, output_dir, temp_dir):
     logger.info(f"Processed {id} for PhiX contamination")
     return output_file  # Return the processed file path
 
+def get_ids(seq_dir):
+    dir_path = pathlib.Path(seq_dir)
+    if not dir_path.is_dir():
+        logger.error(f"Directory {seq_dir} does not exist.")
+        return set()
+
+    logger.info(f"Scanning directory: {dir_path}")
+    # Adjust regex to capture full identifier (e.g., KEWP2_C10)
+    ids = {match.group(1) for file in dir_path.glob("*processed.f*q")
+           if (match := re.match(r'(.+?)_processed', file.stem))}
+
+    logger.info(f"Found IDs: {', '.join(ids)}")
+    return ids
+
+def find_files(seq_dir, ids):
+    dir_path = pathlib.Path(seq_dir)
+    if not dir_path.is_dir():
+        logger.error(f"Directory {seq_dir} does not exist.")
+        return {}
+
+    # Adjusted to capture full identifier (e.g., KEWP2_C10)
+    results = {id: str(files[0]) for id in ids
+               if (files := sorted(dir_path.glob(f"*{id}_processed.f*q")))}
+
+    missing_ids = ids - results.keys()
+    if missing_ids:
+        logger.warning(f"No reads found for IDs: {', '.join(missing_ids)}")
+
+    return results
+
 def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
     genome_fasta = "./ref/GCF_000001405.40_GRCh38.p14_genomic.fna"
+    # Use the full identifier in BAM file names
     bam_file = f"{temp_dir}/{id}_output.bam"
     sorted_bam_file = f"{temp_dir}/{id}_output_sorted.bam"
     unmapped_fastq = f"{output_dir}/{id}_decontaminated_reads.fastq"
@@ -90,7 +93,7 @@ def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
         # Run BWA MEM to align the reads and pipe directly to samtools view
         logger.info(f"Running BWA MEM and SAMtools for {id}")
         bwa_cmd = ["bwa", "mem", "-M", "-t", "8", genome_fasta, input_file]
-        samtools_view_cmd = ["../../../users/marik2/apps/samtools-1.20/samtools", "view", "-b", "-o", bam_file]
+        samtools_view_cmd = ["samtools", "view", "-b", "-o", bam_file]
         with open(bam_file, "w") as bam_out:
             p1 = subprocess.Popen(bwa_cmd, stdout=subprocess.PIPE)
             p2 = subprocess.Popen(samtools_view_cmd, stdin=p1.stdout, stdout=bam_out)
@@ -99,19 +102,19 @@ def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
 
         # Sort BAM file
         logger.info(f"Sorting BAM file for {id}")
-        subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "sort", "-o", sorted_bam_file, bam_file], check=True)
+        subprocess.run(["samtools", "sort", "-o", sorted_bam_file, bam_file], check=True)
 
         # Extract unmapped reads and output as FASTQ
         logger.info(f"Extracting unmapped reads for {id}")
         with open(unmapped_fastq, "w") as fastq_out:
-            p1 = subprocess.Popen(["../../../users/marik2/apps/samtools-1.20/samtools", "view", "-f4", sorted_bam_file], stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(["../../../users/marik2/apps/samtools-1.20/samtools", "fastq"], stdin=p1.stdout, stdout=fastq_out)
+            p1 = subprocess.Popen(["samtools", "view", "-f4", sorted_bam_file], stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["samtools", "fastq"], stdin=p1.stdout, stdout=fastq_out)
             p1.stdout.close()
             p2.communicate()
 
         # Generate statistics
         logger.info(f"Generating statistics for {id}")
-        subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "idxstat", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
+        subprocess.run(["samtools", "idxstat", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
 
         logger.info(f"Successfully processed {id} for genome alignment and stats generation")
 
@@ -143,7 +146,7 @@ def main(seq_dir, output_dir, max_workers=None):
         for future in as_completed(futures):
             try:
                 result = future.result()
-                id = result.split("/")[-1].split("_")[0]  # Extract ID from result
+                id = result.split("/")[-1].split("_nophiX")[0]  # Extract full ID from result
                 executor.submit(run_bwa_mem_and_samtools, id, result, output_dir, temp_dir)
             except Exception as e:
                 logger.error(f"Error processing a file: {e}")
@@ -152,4 +155,4 @@ if __name__ == "__main__":
     seq_dir = './fastp_processed/'
     output_dir = './decontaminated_reads'
 
-    main(seq_dir, output_dir)
+    main(seq_dir, output_dir, max_workers=8)
