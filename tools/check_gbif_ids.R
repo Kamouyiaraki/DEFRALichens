@@ -6,6 +6,7 @@ library(writexl)
 
 #Function to pull gbif metadata from taxonomic name
 
+
 get_gbifid_out <- function(csv_file, out_file){
   
   df<- read.csv(csv_file, header = T)
@@ -15,10 +16,10 @@ get_gbifid_out <- function(csv_file, out_file){
   i<-1
   for(i in 1:length(taxa)){
     
-    if(length(gbif_name_usage(name = gbiftaxID$taxa[i])$results) > 0){
+    if(length(gbif_name_usage(name = gbiftaxID$taxa[i])$results) > 0 && length(gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$species) > 0){
       gbiftaxID$gbif_id[i] <- gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$taxonID
-      gbiftaxID$accepted_name[i] <- gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$species
       gbiftaxID$authorship[i] <- gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$authorship
+      gbiftaxID$accepted_name[i] <- gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$species
       gbiftaxID$lineage[i] <- paste(gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$kingdom,
                                     gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$phylum,
                                     gbif_name_usage(name = gbiftaxID$taxa[i])$results[[1]]$order,
@@ -41,9 +42,11 @@ get_gbifid_out <- function(csv_file, out_file){
     }
   }
   
-  writexl::write_xlsx(gbiftaxID, out_file)
+  writexl::write_xlsx(unique(gbiftaxID), out_file)
   
 }
+
+
 
 ### Usage across files
 #filelist <- list.files(pattern = "_Lichen_Tracking_Sheet_null_taxids.csv")
