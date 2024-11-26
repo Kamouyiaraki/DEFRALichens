@@ -19,8 +19,12 @@ In this pipeline there are **4** instances of reference data used:
 **1) PhiX:** does not need to be compiled into a DB
 
 ```
-wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/enterobacteria_phage_phix174_sensu_lato_uid14015/NC_001422.fna
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/viral/Sinsheimervirus_phiX174/latest_assembly_versions/GCA_000819615.1_ViralProj14015/GCA_000819615.1_ViralProj14015_genomic.fna.gz
+
 ```
+
+ 
+*Update 2024-11-26: the link: ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/enterobacteria_phage_phix174_sensu_lato_uid14015/NC_001422.fna is not longer valid. Most up to date genome used instead.*
 
 **2) HG38 *Homo sapiens*:**
 
@@ -48,7 +52,7 @@ JGI Genomes were downloaded to supplement families that were not found in NCBI. 
 
 |Reference | NCBI Accession| JGI Link | Total Size |
 |---|---|---|---|
-|Escherichia phage phiX174, complete genome|NC_001422.1| --| 6 KB|
+|Escherichia phage (Sinsheimervirus) phiX174, complete genome|GCA_000819615.1| --| 6 KB|
 | | | | |
 |Genome assembly GRCh38.p14|GCF_000001405.40| --| 3.11 GB |
 | | | |
