@@ -14,7 +14,7 @@ In this pipeline there are **4** instances of reference data used:
 	- [NCBI datasets](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/download-and-install/)
 	- [BWA](https://github.com/lh3/bwa)
 
-## Decontamination database compilation: 
+## Decontamination database
 
 **1) PhiX:** does not need to be compiled into a DB
 
