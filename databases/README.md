@@ -41,7 +41,13 @@ diamond makedb --in uniref90.fasta.gz -d uniref90.fasta.dmnd
 
 **4) Custom Lichen DB - scripts referenced are available in `/scripts/`**
 
-The final databases are available on [zenodo](https://zenodo.org/records/14192492). Details on how these were compiled are presented here: 
+The final databases are available on [zenodo](https://zenodo.org/records/14192492) and can be downloaded using the file [lichen_reference_genomes.csv](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/lichen_reference_genomes.csv). 
+
+```
+wget -i lichen_reference_genomes.csv
+```
+
+Details on how these were compiled are presented here: 
 
 ```
 ## Get taxID column from scaffold_reference_genomes.txt 
