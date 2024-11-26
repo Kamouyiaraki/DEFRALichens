@@ -6,7 +6,7 @@ In this pipeline there are **4** instances of reference data used:
 2) Initial decontamination step - removal of human DNA using reference genome:HG38 *Homo sapiens* reference genome GRCh38.p14 (GCF_000001405.40)
 3) Initial binning step - DIAMOND - [uniref90 database](ftp://ftp.expasy.org/databases/uniprot/current_release/uniref/uniref90/)
 4) Initial binning step - Blastn/BBSplit - custom database for 10 lichen classes
-
+   
 
 ## Dependencies
 	- python3.8 + [pandas](https://pandas.pydata.org/docs/getting_started/install.html)
@@ -31,7 +31,7 @@ bwa index GCF_000001405.40_GRCh38.p14_genomic.fna
 
 ```
 
-**3) DIAMOND:**
+## DIAMOND Binning
 
 ```
 wget ftp://ftp.expasy.org/databases/uniprot/current_release/uniref/uniref90/uniref90.fasta.gz
@@ -39,7 +39,31 @@ perl -lane 'if(/^>(\w+)\s.+TaxID\=(\d+)/){print "$1 $2"}' <(zcat uniref90.fasta.
 diamond makedb --in uniref90.fasta.gz -d uniref90.fasta.dmnd
 ```
 
-**4) Custom Lichen DB - scripts referenced are available in `/scripts/`**
+## Lichen reference database
+Lichen reference genome database (lichendb) was generated using reference genomes sourced from NCBI and JGI.
+JGI Genomes were downloaded to supplement families that were not found in NCBI. This requires a valid JGI account and log in details, but can be downloaded using the JGI API (find download options [here](https://genome.jgi.doe.gov/portal/help/download.jsf#/api))
+
+
+### Accession numbers
+
+|Reference | NCBI Accession| JGI Link | Total Size |
+|---|---|---|---|
+|Escherichia phage phiX174, complete genome|NC_001422.1| --| 6 KB|
+| | | | |
+|Genome assembly GRCh38.p14|GCF_000001405.40| --| 3.11 GB |
+| | | |
+|Ascomycota, Coniocybomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Coniocybomycetes_genome_accessions.txt)| -- | 46.2 MB|
+|Ascomycota, Dothideomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Dothideomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_dothideomycetes_links)| 953 MB|
+|Ascomycota, Eurotiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Eurotiomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_eurotiomycetes_links)| 428 MB|
+|Ascomycota, Lecanoromycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Lecanoromycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_lecanoromycetes_links) | 1.31 GB|
+|Ascomycota, Leotiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Leotiomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_leotiomycetes_links) | 3.30 GB|
+|Ascomycota, Lichinomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Lichinomycetes_genome_accessions.txt) | -- | 58.1 MB|
+|Ascomycota, Sordariomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Sordariomycetes_genome_accessions.txt) |[JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_sordariomycetes_links) | 871 MB |
+|Ascomycota, *Incertae sedis*, Thelocarpaceae|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Thelocarpaceae_genome_accessions.txt) | -- | 20.7 MB |
+| | |
+|Basidiomycota, Basidiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Basidiomycetes_genome_accessions.txt) | -- | 911 MB|
+|Basidiomycota, Urediniomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Urediniomycetes_genome_accessions.txt) | -- | 2.30 GB|
+
 
 The final databases are available on [zenodo](https://zenodo.org/records/14192492) and can be downloaded using the file [lichen_reference_genomes.csv](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/lichen_reference_genomes.csv). 
 
@@ -47,7 +71,9 @@ The final databases are available on [zenodo](https://zenodo.org/records/1419249
 wget -i lichen_reference_genomes.csv
 ```
 
-Details on how these were compiled are presented here: 
+**Compiling lichendb from scratch:** 
+
+All scripts referenced are available in `/scripts/`
 
 ```
 ## Get taxID column from scaffold_reference_genomes.txt 
@@ -56,7 +82,6 @@ awk -F"\t" '{print $4}' scaffold_reference_genomes.txt | tail -n +2 > scaffold_r
 ## Run taxonkit to get lineage information + reformatted lineage information to standardize lineage across all
 ./apps/bin/taxonkit lineage scaffold_ref_genomes.txt --data-dir ./apps/bin/taxonkit_db/ > scaffold_ref_genomes_lineages.txt
 ./apps/bin/taxonkit reformat scaffold_ref_genomes_lineages.txt --data-dir ./apps/bin/taxonkit_db > scaffold_ref_genomes_lineages_reformat.txt
-
 
 ## Make directories to be used as db's
 mkdir Basidiomycota
@@ -149,7 +174,7 @@ bash cat_genomes.sh
 ```
 
 
-**5) Makeblastdb Lichen DB**
+**Makeblastdb Lichen DB**
 
 Blast databases were made for each of the references using `makeblastdb` version 2.11.0+. 
 
@@ -201,32 +226,9 @@ cd ../Ascomycota/Eurotiomycetes/
 ```
 
 
-**JGI Genome data details**
-JGI Genomes were downloaded to supplement families that were not found in NCBI. This requires a valid JGI account and log in details, but can be downloaded using the JGI API (find download options [here](https://genome.jgi.doe.gov/portal/help/download.jsf#/api))
-
-
-### JGI Terms and Conditions to be aware of:
+## JGI Terms and Conditions to be aware of:
 
 > By accessing JGI data, you agree not to publish any articles containing analyses of genes or genomic data prior to publication by the principal investigators of its comprehensive analysis without the consent of the project's principal investigator(s). These restrictions will be lifted upon publication(s) of the dataset or two years after the public release of this data, whichever is first. Scientists are expected to contact the principal investigator about their intentions to include any data from this project in a publication prior to publication of the primary report in order to ensure that their publication does not compete directly with planned publications (e.g. reserved analyses) of the principal investigators.
 
 > If these data are used for publication, the following acknowledgment should be included: ‘These sequence data were produced by the US Department of Energy Joint Genome Institute https://www.jgi.doe.gov/ in collaboration with the user community.’ We also request that you appropriately cite any JGI resources used for analysis (such as IMG, Phytozome or Mycocosm) and that you notify us upon publication.
 
-## Accession numbers
-
-|Reference | NCBI Accession| JGI Link | Total Size |
-|---|---|---|---|
-|Escherichia phage phiX174, complete genome|NC_001422.1| --| 6 KB|
-| | | | |
-|Genome assembly GRCh38.p14|GCF_000001405.40| --| 3.11 GB |
-| | | |
-|Ascomycota, Coniocybomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Coniocybomycetes_genome_accessions.txt)| -- | 46.2 MB|
-|Ascomycota, Dothideomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Dothideomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_dothideomycetes_links)| 953 MB|
-|Ascomycota, Eurotiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Eurotiomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_eurotiomycetes_links)| 428 MB|
-|Ascomycota, Lecanoromycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Lecanoromycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_lecanoromycetes_links) | 1.31 GB|
-|Ascomycota, Leotiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Leotiomycetes_genome_accessions.txt) | [JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_leotiomycetes_links) | 3.30 GB|
-|Ascomycota, Lichinomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Lichinomycetes_genome_accessions.txt) | -- | 58.1 MB|
-|Ascomycota, Sordariomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Reduced_Sordariomycetes_genome_accessions.txt) |[JGI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/jgi_sordariomycetes_links) | 871 MB |
-|Ascomycota, *Incertae sedis*, Thelocarpaceae|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Thelocarpaceae_genome_accessions.txt) | -- | 20.7 MB |
-| | |
-|Basidiomycota, Basidiomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Basidiomycetes_genome_accessions.txt) | -- | 911 MB|
-|Basidiomycota, Urediniomycetes|[NCBI](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/Urediniomycetes_genome_accessions.txt) | -- | 2.30 GB|
