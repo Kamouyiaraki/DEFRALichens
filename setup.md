@@ -44,6 +44,14 @@ Outputs a message confirming the setup is complete.
 
 ## Usage
 
+This script requires:
+- a project ID to name the directory
+-  [lichen_reference_genomes.csv](https://github.com/Kamouyiaraki/DEFRALichens/blob/main/databases/ref/lichen_reference_genomes.csv)
+
+The script [`setup_library_dir.py`](#Setting-up-library-directories) can then also be used to subsequently set up individual library directories within your project directory. This script requires a project ID and a file of download links.
+
+![starting_structure](tools/files_used/structure1.PNG)
+
 **Prerequisites**
 Ensure the following tools are installed:
 - wget
@@ -61,6 +69,9 @@ python setup_project.py <project_id>
 
 
 ## Output Structure
+
+![output_structure](tools/files_used/structure2.PNG)
+
 After execution, the directory structure will be as follows:
 
 ```
