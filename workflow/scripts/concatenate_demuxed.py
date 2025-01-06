@@ -141,9 +141,9 @@ def main(file_path, input_dirs, output_dir, max_workers=8):
 
 if __name__ == "__main__":
     # Specify directories
-    csv_file = "PRJEB81712/X204SC24116678-Z01-F001/Batch_1_Lichen_Tracking_Sheet.csv"
-    input_dirs = ["PRJEB81712/X204SC24116678-Z01-F001/raw_data", "PRJEB81712/X204SC24116678-Z01-F001/demultiplexed"]
+    csv_file = "./Batch_1_Lichen_Tracking_Sheet.csv"
+    input_dirs = ["./raw_data", "./demultiplexed"]
     column_name = "Novogene_Sub_Library_Name"  # or whatever your actual column name is
 
-    output_dir = "PRJEB81712/X204SC24116678-Z01-F001/input_reads"
+    output_dir = "./input_reads"
     main(csv_file, input_dirs, output_dir)
