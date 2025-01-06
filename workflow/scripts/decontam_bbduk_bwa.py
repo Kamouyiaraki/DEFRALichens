@@ -38,10 +38,10 @@ def run_subprocess(command, id, log_prefix):
 def run_bbduk(id, file_path, output_dir, temp_dir):
     output_file = os.path.join(temp_dir, f"{id}_nophiX.fq")
     command = [
-        "../../../bin/bbmap/bbduk.sh",
+        "../bbmap/bbduk.sh",
         f"in={file_path}",
         f"out={output_file}",
-        "ref=./ref/NC_001422.1_escherichia_phage_phiX174.fasta",
+        "ref=../ref/GCA_000819615.1_ViralProj14015_genomic.fna",
         "k=31",
         "hdist=1",
         "-Xmx2g",
@@ -59,8 +59,8 @@ def get_ids(seq_dir):
 
     logger.info(f"Scanning directory: {dir_path}")
     # Adjust regex to capture full identifier (e.g., KEWP2_C10)
-    ids = {match.group(1) for file in dir_path.glob("*processed.f*q")
-           if (match := re.match(r'(.+?)_processed', file.stem))}
+    ids = {match.group(1) for file in dir_path.glob("*all_processed_reads.f*q")
+           if (match := re.match(r'(.+?)_all_processed_reads', file.stem))}
 
     logger.info(f"Found IDs: {', '.join(ids)}")
     return ids
@@ -73,7 +73,7 @@ def find_files(seq_dir, ids):
 
     # Adjusted to capture full identifier (e.g., KEWP2_C10)
     results = {id: str(files[0]) for id in ids
-               if (files := sorted(dir_path.glob(f"*{id}_processed.f*q")))}
+               if (files := sorted(dir_path.glob(f"*{id}_all_processed_reads.f*q")))}
 
     missing_ids = ids - results.keys()
     if missing_ids:
@@ -82,12 +82,12 @@ def find_files(seq_dir, ids):
     return results
 
 def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
-    genome_fasta = "./ref/GCF_000001405.40_GRCh38.p14_genomic.fna"
+    genome_fasta = "../ref/GCF_000001405.40_GRCh38.p14_genomic.fna"
     # Use the full identifier in BAM file names
     bam_file = f"{temp_dir}/{id}_output.bam"
     sorted_bam_file = f"{temp_dir}/{id}_output_sorted.bam"
     unmapped_fastq = f"{output_dir}/{id}_decontaminated_reads.fastq"
-    stats_file = f"{output_dir}/{id}_human_mapping_idxstats.txt"
+    stats_file = f"{output_dir}/{id}_human_mapping_flagtats.txt"
 
     try:
         # Run BWA MEM to align the reads and pipe directly to samtools view
@@ -114,7 +114,7 @@ def run_bwa_mem_and_samtools(id, input_file, output_dir, temp_dir):
 
         # Generate statistics
         logger.info(f"Generating statistics for {id}")
-        subprocess.run(["samtools", "idxstat", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
+        subprocess.run(["samtools", "flagstat", sorted_bam_file], stdout=open(stats_file, "w"), check=True)
 
         logger.info(f"Successfully processed {id} for genome alignment and stats generation")
 
