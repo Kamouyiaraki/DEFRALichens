@@ -42,7 +42,7 @@ def get_ids_and_files(seq_dir):
 
     # Look for fastq or fq files and extract IDs from filenames
     results = {re.match(r'(.+?)_.*', file.stem).group(1): str(file)
-               for file in dir_path.glob("*unmapped_reads.f*q*")}
+               for file in dir_path.glob("*decontaminated_reads.f*q*")}
 
     if not results:
         logger.error(f"No reads found in {seq_dir}")
@@ -147,20 +147,20 @@ def run_bwa_unassembled(id, assembler, input_file):
 
             # Convert SAM to BAM
             logger.info(f"Converting SAM to BAM for {id}")
-            subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "view", "-b", "-S", sam_file, "-o", bam_file], check=True)
+            subprocess.run(["samtools", "view", "-b", "-S", sam_file, "-o", bam_file], check=True)
 
             # Sort BAM file
             logger.info(f"Sorting BAM file for {id}")
-            subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "sort", "-o", sorted_bam_file, bam_file], check=True)
+            subprocess.run(["samtools", "sort", "-o", sorted_bam_file, bam_file], check=True)
 
             # Extract unassembled reads
             logger.info(f"Extracting unassembled reads for {id}")
             with unassembled_fasta.open("w") as fastq_out:
-                subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "fasta", "-f", "4", sorted_bam_file], stdout=fastq_out, check=True)
+                subprocess.run(["samtools", "fasta", "-f", "4", sorted_bam_file], stdout=fastq_out, check=True)
 
             # Generate statistics
             logger.info(f"Generating statistics for {id}")
-            subprocess.run(["../../../users/marik2/apps/samtools-1.20/samtools", "stats", sorted_bam_file], stdout=open(assembly_stats_file, "w"), check=True)
+            subprocess.run(["samtools", "stats", sorted_bam_file], stdout=open(assembly_stats_file, "w"), check=True)
 
             logger.info(f"Successfully processed {id} for unassembled sequences")
 
