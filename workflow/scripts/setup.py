@@ -45,6 +45,29 @@ lichen_db_csv = "lichen_reference_genomes.csv"
 lichen_md5_file = lichen_db_dir / "MD5.txt"
 bbmap_tarball = project_dir / "BBMap_39.10.tar.gz"
 
+# Download files and process them
+run_command(
+    ["wget", PHAGE_GENOME_URL, "-P", ref_dir, "-q"],
+    "Failed to download the phage genome."
+)
+run_command(
+    ["gunzip", str(phage_genome_gz)],
+    "Failed to decompress the PhiX genome."
+)
+run_command(
+    ["wget", HUMAN_GENOME_URL, "-P", ref_dir, "-q"],
+    "Failed to download the human genome."
+)
+run_command(
+    ["gunzip", str(human_genome_gz)],
+    "Failed to decompress the human genome."
+)
+run_command(
+    ["bwa", "index", str(human_genome_fna)],
+    "Failed to index the human genome."
+)
+
+
 # Lichen DB setup
 run_command(
     ["wget", "-i", str(lichen_db_csv), "-P", lichen_db_dir, "-q"],
