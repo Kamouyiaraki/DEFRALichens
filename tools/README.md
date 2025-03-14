@@ -7,7 +7,6 @@
 - Copy and paste the output into a `.csv` file
   
 ### R scripts used to filter which JGI genomes to download
-
 - JGI_genomes_to_download.R
 - JGI_metadata.R
 - files_used/JGI.csv
@@ -21,7 +20,6 @@
 
 
 ### R script for pulling GBIF metadata based on taxonomic name 
-
 - Source function `get_gbifid_out()` in check_gbif_ids.R
 - Relies on [taxize](https://cran.r-project.org/package=taxize)
 - Run on a csv file of taxonomic names (column 1 = Taxonomic_name)
@@ -42,3 +40,13 @@ for(f in 1:length(filelist)){
   get_gbifid_out(csv_file = filelist[f], out_file=fout)
 }
 ```
+
+
+### R function for populating TaxIDs into metadata sheets
+- Source function `fill_taxid_column()` in fill_taxid_column.R
+- Fill taxid column in master tracking sheet (i.e., master sheet with sample ID, sequencing name (novogene name), sample metadata and taxonomic name used with TaxIDs from 2 other spreadsheets of newly registered TaxIDs & TaxIDs that already existed for each taxonomic name.
+
+    **Important information to consider is column names for each of the spreadsheets:**
+1. Metadata spreadsheet requires the columns: `Taxonomic_name`, `TaxID`
+2. Existing TaxID spreadhseet requires the columns: `taxa`, `TaxID`, `accepted_name_IF`
+3. Registered TaxID spreadhseet requires the columns: `Taxonomic_name`, `TaxID`
