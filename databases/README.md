@@ -80,101 +80,47 @@ wget -i lichen_reference_genomes.csv
 All scripts referenced are available in `/scripts/`
 
 ```
-## Get taxID column from scaffold_reference_genomes.txt 
-awk -F"\t" '{print $4}' scaffold_reference_genomes.txt | tail -n +2 > scaffold_ref_genomes.txt
+## Extract TaxID column efficiently and remove header in one step
+awk -F"	" 'NR>1 {print $4}' scaffold_reference_genomes.txt > scaffold_ref_genomes.txt
 
-## Run taxonkit to get lineage information + reformatted lineage information to standardize lineage across all
-./apps/bin/taxonkit lineage scaffold_ref_genomes.txt --data-dir ./apps/bin/taxonkit_db/ > scaffold_ref_genomes_lineages.txt
-./apps/bin/taxonkit reformat scaffold_ref_genomes_lineages.txt --data-dir ./apps/bin/taxonkit_db > scaffold_ref_genomes_lineages_reformat.txt
+## Run taxonkit commands efficiently
+TAXONKIT_DB="./apps/bin/taxonkit_db"
+./apps/bin/taxonkit lineage scaffold_ref_genomes.txt --data-dir "$TAXONKIT_DB" | \
+./apps/bin/taxonkit reformat --data-dir "$TAXONKIT_DB" > scaffold_ref_genomes_lineages_reformat.txt
 
-## Make directories to be used as db's
-mkdir Basidiomycota
-mkdir Ascomycota
+## Create required directories using a loop
+declare -A directories=(
+    ["Basidiomycota"]=('Basidiomycetes' 'Urediniomycetes')
+    ["Ascomycota"]=('Coniocybomycetes' 'Dothideomycetes' 'Eurotiomycetes' 'Lecanoromycetes' 'Leotiomycetes' 'Lichinomycetes' 'Sordariomycetes' 'Thelocarpaceae')
+)
 
-## subset by search term in lineage
-mkdir Ascomycota/Coniocybomycetes
-mkdir Ascomycota/Dothideomycetes 
-mkdir Ascomycota/Eurotiomycetes
-mkdir Ascomycota/Lecanoromycetes
-mkdir Ascomycota/Leotiomycetes
-mkdir Ascomycota/Lichinomycetes
-mkdir Ascomycota/Sordariomycetes
-mkdir Ascomycota/Thelocarpaceae 			
-	#(Ascomycota incertae sedis) 
-mkdir Basidiomycota/Basidiomycetes 
-mkdir Basidiomycota/Urediniomycetes 
+for phylum in "${!directories[@]}"; do
+    mkdir -p "$phylum"
+    for class in "${directories[$phylum][@]}"; do
+        mkdir -p "$phylum/$class"
+    done
+done
 
+## Run Python scripts
 python3.8 lichen_groups.py
-	#merges the scaffold_reference_genomes.txt table and the output from taxonkit (scaffold_ref_genomes_lineages_reformat.txt > scaffold_reference_genomes_lineages.csv)
-	#goes through each class (in some cases Families - defined within python script) of fungi and subsets table to output a single csv with genome information for that class
-
-## After manual check of folders - filter files with more than 10 hits to keep at least 1 hit per family, with best quality assembly (complete genome/chromosome)
 python3.8 subset_references.py
 
-## Get accession numbers from each of these spreadsheets
+## Accession retrieval and genome download
 bash get_accessions.sh
-
-## Download the 
 bash download_genomes.sh
 
-## Concatenate genomes into a single file in each class directory 
-	## For JGI genomes:
-	### For Dothideomycetes
-    find ./Bimnz1/ -type f -exec mv {} ./// \;
-    find ./Veren1/ -type f -exec mv {} ./// \;
-    rm -r ./Bimnz1/
-    rm -r ./Veren1/
-
-	### 	Eurotiomycetes
-    find ./Cocba1/ -type f -exec mv {} ./// \;
-    find ./Parmar1/ -type f -exec mv {} ./// \;
-    rm -r ./Cocba1/
-    rm -r ./Parmar1/
-
-	###	Lecanoromycetes
-    find ./Grascr1/ -type f -exec mv {} ./// \;
-    rm -r ./Grascr1/
-
-	###	Leotiomycetes
-    find ./Atrpi1/ -type f -exec mv {} ./// \;
-    find ./Lopnit1_1/ -type f -exec mv {} ./// \;
-    find ./Bulin1/ -type f -exec mv {} ./// \;
-    find ./Cocst1/ -type f -exec mv {} ./// \;
-    find ./Pseel1/ -type f -exec mv {} ./// \;
-    find ./Spafl1/ -type f -exec mv {} ./// \;
-    find ./Themi1/ -type f -exec mv {} ./// \;
-    find ./Elyde1/ -type f -exec mv {} ./// \;
-    find ./Greab1/ -type f -exec mv {} ./// \;
-    find ./Greabi1/ -type f -exec mv {} ./// \;        
-    find ./Psever1/ -type f -exec mv {} ./// \;
-    find ./PseVKM3775_1/ -type f -exec mv {} ./// \;  
-    find ./PseVKM4514_1/ -type f -exec mv {} ./// \;
-    find ./Thest1/ -type f -exec mv {} ./// \;           
-    rm -r ./Atrpi1/ 
-    rm -r  /Lopnit1_1/ 
-    rm -r ./Bulin1/ 
-    rm -r ./Cocst1/ 
-    rm -r ./Pseel1/ 
-    rm -r ./Spafl1/ 
-    rm -r ./Themi1/ 
-    rm -r ./Elyde1/ 
-    rm -r ./Greab1/ 
-    rm -r ./Greabi1/        
-    rm -r ./Psever1/
-    rm -r ./PseVKM3775_1/   
-    rm -r ./PseVKM4514_1/ 
-    rm -r ./Thest1/
-
-	###	Sordariomycetes
-    find ./Nieex1/ -type f -exec mv {} ./// \;
-    rm -r ./Nieex1/
-```
-
-#### The following was then run once per directory:
-
-```
+## Clean up zip files and concatenate genomes
 rm -r *.zip
 bash cat_genomes.sh
+
+## Move and clean genome directories using a loop
+for dir in Bimnz1 Veren1 Cocba1 Parmar1 Grascr1 Atrpi1 Lopnit1_1 Bulin1 Cocst1 Pseel1 Spafl1 Themi1 Elyde1 \
+            Greab1 Greabi1 Psever1 PseVKM3775_1 PseVKM4514_1 Thest1 Nieex1; do
+    if [ -d "$dir" ]; then
+        find "$dir/" -type f -exec mv {} ./// \;
+        rm -r "$dir"
+    fi
+done
 ```
 
 
