@@ -50,3 +50,10 @@ for(f in 1:length(filelist)){
 1. Metadata spreadsheet requires the columns: `Taxonomic_name`, `TaxID`
 2. Existing TaxID spreadhseet requires the columns: `taxa`, `TaxID`, `accepted_name_IF`
 3. Registered TaxID spreadhseet requires the columns: `Taxonomic_name`, `TaxID`
+
+
+### Get Illumina indexes from spreadsheet using CSV2FASTA
+- csv2fasta.py
+- single index: `python csv2fasta.py -i input.csv -n Name -s Sequence -o /path/to/output`
+- forward and reverse fasta usage: `python csv2fasta.py -i input.csv -n ID -f Forward -r Reverse -o /path/to/output`
+- `-w` flag is available for both to wrap FASTA output instead of produce single line FASTA
