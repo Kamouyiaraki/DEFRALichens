@@ -31,8 +31,8 @@ def process_csv(input_file, name_col, seq_col, output_dir, wrap, fwd_col=None, r
             
             if fwd_col and rev_col:
                 # Dual FASTA mode
-                fwd_file = os.path.join(output_dir, "forward_sequences.fasta")
-                rev_file = os.path.join(output_dir, "reverse_sequences.fasta")
+                fwd_file = os.path.join(output_dir, f"{fwd_col}.fasta")
+                rev_file = os.path.join(output_dir, f"{rev_col}.fasta")
                 
                 with open(fwd_file, "w") as fwd_fasta, open(rev_file, "w") as rev_fasta:
                     for row in reader:
@@ -45,7 +45,7 @@ def process_csv(input_file, name_col, seq_col, output_dir, wrap, fwd_col=None, r
             
             else:
                 # Single FASTA mode
-                fasta_file = os.path.join(output_dir, "sequences.fasta")
+                fasta_file = os.path.join(output_dir, f"{seq_col}_sequences.fasta")
                 with open(fasta_file, "w") as fasta:
                     for row in reader:
                         fasta.write(f">{row[name_col]}\n")
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
 
 #single fasta usage:
-#python csv2fasta.py -i input.csv -n Name -s Sequence -o /path/to/output
+#python csv2fasta.py -i input.csv --name_column Name -s Sequence -o /path/to/output
 #forward and reverse fasta usage:
 #python csv2fasta.py -i input.csv -n ID -f Forward -r Reverse -o /path/to/output
 #-w to wrap fasta instead of single line fasta
